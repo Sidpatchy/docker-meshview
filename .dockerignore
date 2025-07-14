@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+.gitmodules
+
+# GitHub
+.github/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Local data and config
+data/
+config.ini
+packets.db
+cleanup.sh
+cleanup.log
+*.log
+
+# Documentation
+README.md
+screenshots/

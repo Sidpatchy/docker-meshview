@@ -1,0 +1,18 @@
+services:
+  meshview:
+    build: .
+    container_name: meshview
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./data:/app/data
+      - ./config.ini:/app/config.ini:ro
+    environment:
+      - CONFIG_FILE=/app/config.ini
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
