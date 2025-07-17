@@ -18,3 +18,17 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  db-cleanup:
+    build:
+      context: .
+      dockerfile: Dockerfile.cleanup
+    container_name: meshview-cleanup
+    volumes:
+      - ./packets.db:/app/packets.db
+    environment:
+      - DATABASE_FILE=/app/packets.db
+      - RETENTION_DAYS=14
+    restart: unless-stopped
+    depends_on:
+      - meshview

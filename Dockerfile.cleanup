@@ -1,0 +1,11 @@
+FROM alpine:latest
+
+RUN apk add --no-cache sqlite bash dcron
+
+COPY cleanup.sh /usr/local/bin/cleanup.sh
+RUN chmod +x /usr/local/bin/cleanup.sh
+
+# Create crontab entry
+RUN echo "0 2 * * * /usr/local/bin/cleanup.sh" > /etc/crontabs/root
+
+CMD ["crond", "-f", "-d", "8"]
