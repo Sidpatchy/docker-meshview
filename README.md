@@ -37,3 +37,43 @@ $ nano config.ini
 # Start the contaner
 $ docker compose up -d
 ```
+
+## Updating
+```bash
+# Bring down the stack
+docker compose down
+
+# Rebuild the containers
+docker compose build --no-cache
+
+# Bring the stack back up
+docker compose up -d
+```
+## Parameters
+
+### Ports
+Ports are separated by a colon and indicate `<EXTERNAL>:<INTERNAL>`. For example, `9872:8081` would expose port 8081 from _inside_ the container to be accessible from _outside_ the container through port 9872.
+
+#### Meshview container
+| Port      | Function       |
+|-----------|----------------|
+| 8081:8081 | HTTP(s) web UI |
+
+#### Database Cleanup Sidecar
+N/A
+
+### Environment Variables
+
+#### Meshview Container
+| Parameter     | Function                                                                                      |
+|---------------|-----------------------------------------------------------------------------------------------|
+| CONFIG_FILE   | Path to the config.ini file within the container (Optional)                                   |
+| DATABASE_FILE | Path to the packets.db file within the container. (Optional)                                  |
+| PUID          | Process User ID - Avoids causing issues with permissions between the host and the container.  |
+| PGID          | Process Group ID - Avoids causing issues with permissions between the host and the container. |
+
+#### Database Cleanup Sidecar
+| Parameter      | Function                                                                                      |
+|----------------|-----------------------------------------------------------------------------------------------|
+| DATABASE_FILE  | Path to the packets.db file within the container. (Optional)                                  |
+| RETENTION_DAYS | How many days to retain data (Optional) (Default: 14 days)                                    |
