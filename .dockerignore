@@ -28,11 +28,6 @@ ehthumbs.db
 Thumbs.db
 
 # Local data and config
-data/
-config.ini
-packets.db
-cleanup.sh
-cleanup.log
 *.log
 
 # Documentation

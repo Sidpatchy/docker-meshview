@@ -1,11 +1,11 @@
 FROM alpine:latest
 
-RUN apk add --no-cache sqlite bash dcron
+RUN apk add --no-cache sqlite bash busybox-suid
 
 COPY cleanup.sh /usr/local/bin/cleanup.sh
 RUN chmod +x /usr/local/bin/cleanup.sh
 
 # Create crontab entry
-RUN echo "0 2 * * * /usr/local/bin/cleanup.sh" > /etc/crontabs/root
+RUN echo "0 2 * * * /usr/local/bin/cleanup.sh" > /var/spool/cron/crontabs/root
 
-CMD ["crond", "-f", "-d", "8"]
+CMD exec crond -f -l 2
