@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     git \
     curl \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -18,19 +19,18 @@ RUN git clone --recurse-submodules https://github.com/pablorevilla-meshtastic/me
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create necessary directories
-RUN mkdir -p /app/data
-
 # Copy startup script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Create non-root user
-RUN groupadd -r meshview && useradd -r -g meshview meshview
-RUN chown -R meshview:meshview /app
+# Pre-create files that will be bind-mounted
+RUN touch /app/config.ini /app/packets.db
 
-# Switch to non-root user
-USER meshview
+# Create default user (will be modified at runtime)
+RUN groupadd -r -g 1000 meshview && useradd -r -u 1000 -g meshview meshview
+
+# Don't switch to non-root user yet - this will happen in the entrypoint
+# USER meshview
 
 # Expose port
 EXPOSE 8081

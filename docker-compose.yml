@@ -5,10 +5,12 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - ./data:/app/data
-      - ./config.ini:/app/config.ini:ro
+      - ./packets.db:/app/packets.db
+      - ./config.ini:/app/config.ini
     environment:
       - CONFIG_FILE=/app/config.ini
+      - PUID=1000
+      - PGID=1000
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/"]

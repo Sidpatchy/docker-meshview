@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Default PUID and PGID
+PUID=${PUID:-1000}
+PGID=${PGID:-1000}
+
 # Function to handle shutdown
 cleanup() {
     echo "Shutting down Meshview..."
@@ -11,33 +15,50 @@ cleanup() {
     exit 0
 }
 
-# Set trap for cleanup
 trap cleanup SIGTERM SIGINT
 
-# Default config file
-CONFIG_FILE=${CONFIG_FILE:-/app/config.ini}
+# Update user and group IDs if they differ from defaults
+if [ "$PUID" != "1000" ] || [ "$PGID" != "1000" ]; then
+    echo "Setting user meshview to UID: $PUID and GID: $PGID"
 
-# Check if config file exists
-if [ ! -f "$CONFIG_FILE" ]; then
-    echo "Config file not found at $CONFIG_FILE"
-    echo "Creating default config from sample..."
-    cp /app/sample.config.ini "$CONFIG_FILE"
+    # Update group
+    groupmod -o -g "$PGID" meshview
+
+    # Update user
+    usermod -o -u "$PUID" meshview
+fi
+
+# Ensure proper ownership of app directory
+chown -R meshview:meshview /app
+
+CONFIG_FILE=${CONFIG_FILE:-/app/config.ini}
+DATABASE_FILE=${DATABASE_FILE:-/app/packets.db}
+
+# Function to run commands as meshview user
+run_as_user() {
+    gosu meshview "$@"
+}
+
+# Check and download config if needed (as meshview user)
+if [ ! -s "$CONFIG_FILE" ]; then
+    echo "Config file is empty, downloading default..."
+    run_as_user curl -o "$CONFIG_FILE" https://raw.githubusercontent.com/pablorevilla-meshtastic/meshview/refs/heads/master/sample.config.ini
+    echo "Config file downloaded successfully"
+else
+    echo "Config file already exists and has content"
 fi
 
 echo "Starting Meshview with config: $CONFIG_FILE"
 
-# Start database in background
+# Start services as meshview user
 echo "Starting database..."
-python startdb.py --config "$CONFIG_FILE" &
+run_as_user python startdb.py --config "$CONFIG_FILE" &
 DB_PID=$!
 
-# Wait a bit for database to initialize
 sleep 5
 
-# Start web server in background
 echo "Starting web server..."
-python main.py --config "$CONFIG_FILE" &
+run_as_user python main.py --config "$CONFIG_FILE" &
 WEB_PID=$!
 
-# Wait for processes
 wait $DB_PID $WEB_PID
